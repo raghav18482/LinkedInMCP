@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+        "ProjectMCP": {
+          "command": "/Users/raghavswami/.local/bin/uv",
+          "args": [
+              "--directory",
+              "/Users/raghavswami/Desktop/ProjectMCP",
+              "run",
+              "linkedIn.py"
+          ]
+        }
+      }
+  }
