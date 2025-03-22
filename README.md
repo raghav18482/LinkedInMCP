@@ -105,7 +105,7 @@ python linkedIn.py
 
 This project currently uses STDIO transport, which is ideal for development and testing. Future implementations will include SSE (Server-Sent Events) transport.
 
-#### STDIO vs SSE Transport:
+#### STDIO vs SSE Transport: 
 
 - **STDIO Transport**:
   - Simple command-line based communication
