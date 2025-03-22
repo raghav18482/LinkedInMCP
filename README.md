@@ -76,6 +76,10 @@ which uv  # On macOS/Linux
 where uv  # On Windows
 ```
 
+5. Run the Project:
+   ```plaintext
+   uv run linkedIn.py
+   ```
 
 ## Available Tools
 
