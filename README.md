@@ -47,6 +47,11 @@ A Model Context Protocol (MCP) server implementation for interacting with Linked
    RAPIDAPI_KEY=your_rapidapi_key_here
    ```
 
+5. Run the Project:
+   ```plaintext
+   uv run linkedIn.py
+   ```
+
 ## Claude AI Desktop Setup
 
 To integrate with Claude AI Desktop, create or modify the configuration file at:
@@ -76,10 +81,6 @@ which uv  # On macOS/Linux
 where uv  # On Windows
 ```
 
-5. Run the Project:
-   ```plaintext
-   uv run linkedIn.py
-   ```
 
 ## Available Tools
 
