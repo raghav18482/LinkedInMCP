@@ -4,6 +4,9 @@ import json
 from mcp.server.fastmcp import FastMCP
 import os
 from dotenv import load_dotenv
+import base64
+from pathlib import Path
+from datetime import datetime
 
 load_dotenv()
 
@@ -142,9 +145,7 @@ async def get_jobs(keywords: str, geo_code: int = 92000000, date_posted: str = "
     return json.dumps(data, indent=2)
 
 
-
-
-async def get_linkedin_pdf_cv(linkedin_url: str) -> bytes | None:
+async def get_linkedin_pdf_cv(linkedin_url: str) -> dict[str, Any] | None:
     """Fetch LinkedIn profile as PDF CV using the Fresh LinkedIn Profile Data API."""
     params = {
         "linkedin_url": linkedin_url
@@ -162,37 +163,67 @@ async def get_linkedin_pdf_cv(linkedin_url: str) -> bytes | None:
                 timeout=30.0
             )
             response.raise_for_status()
-            return response.content  # Return the binary PDF content
+            return response.json()  # Returns JSON with base64 data
         except Exception as e:
             print(f"Error fetching PDF CV: {e}")
             return None
+
+def save_base64_to_pdf(base64_data: str, output_path: str = None) -> str:
+    """Convert base64 data to PDF and save it."""
+    try:
+        # Decode base64 data
+        pdf_data = base64.b64decode(base64_data,validate=True)
+
+           # Validate PDF signature
+        if pdf_data[0:4] != b'%PDF':
+            raise ValueError('Invalid PDF: Missing PDF signature')
+        
+        # Generate default filename if not provided
+        if not output_path:
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            downloads_dir = Path.home() / "Downloads"
+            output_path = str(downloads_dir / f"linkedin_cv_{timestamp}.pdf")
+        
+        # Ensure directory exists
+        Path(output_path).parent.mkdir(parents=True, exist_ok=True)
+        
+        # Write PDF file
+        with open(output_path, "wb") as file:
+            file.write(pdf_data)
+        
+        return output_path
+    except Exception as e:
+        raise Exception(f"Error saving PDF: {e}")
 
 @mcp.tool()
 async def get_pdf_cv(linkedin_url: str, output_path: str = None) -> str:
     """Get LinkedIn profile as a PDF CV for a given profile URL.
     
-    This function retrieves a PDF version of the LinkedIn profile and can either
-    save it to a file or return a message confirming the PDF was generated.
+    This function retrieves a PDF version of the LinkedIn profile and saves it to a file.
+    If no output path is specified, it will save to the Downloads folder.
     
     Args:
         linkedin_url: The LinkedIn profile URL.
         output_path: Optional path to save the PDF file. If not provided, 
-                     the PDF won't be saved to disk.
+                    saves to Downloads folder with timestamp.
     """
-    pdf_data = await get_linkedin_pdf_cv(linkedin_url)
-    if not pdf_data:
+    response_data = await get_linkedin_pdf_cv(linkedin_url)
+    if not response_data:
         return "Unable to fetch LinkedIn profile PDF CV."
     
-    if output_path:
-        try:
-            with open(output_path, "wb") as file:
-                file.write(pdf_data)
-            return f"PDF CV saved successfully to: {output_path}"
-        except Exception as e:
-            return f"Error saving PDF CV: {e}"
-    else:
-        return f"PDF CV generated successfully for {linkedin_url} (size: {len(pdf_data)} bytes). No file was saved as no output path was provided."
-
+    try:
+        # Extract base64 data from response
+        if 'pdf_data' not in response_data or not response_data['pdf_data']:
+            return "No PDF data received from the API."
+        
+        base64_data = response_data['pdf_data']
+        
+        # Save the PDF
+        saved_path = save_base64_to_pdf(base64_data, output_path)
+        
+        return f"PDF CV saved successfully to: {saved_path}"
+    except Exception as e:
+        return f"Error processing PDF CV: {e}"
 
 # Constants for Job Posting Feed API
 JOB_POSTING_API_BASE = "https://job-posting-feed-api.p.rapidapi.com"
