@@ -52,6 +52,36 @@ A Model Context Protocol (MCP) server implementation for interacting with Linked
    uv run linkedIn.py
    ```
 
+## Docker Support
+
+You can also run this project using Docker. This is the recommended way to ensure consistent behavior across different environments.
+
+### Prerequisites
+- Docker installed on your machine
+- Your `.env` file configured with the necessary API keys
+
+### Building and Running with Docker
+
+1. Build the Docker image:
+   ```bash
+   docker build -t projectmcp .
+   ```
+
+2. Run the container:
+   ```bash
+   docker run -it --env-file .env projectmcp
+   ```
+
+   Options explained:
+   - `-it`: Makes the container interactive
+   - `--env-file .env`: Passes your environment variables from .env file
+   - `projectmcp`: The name of the Docker image we built
+
+   To run in detached (background) mode:
+   ```bash
+   docker run -d --env-file .env projectmcp
+   ```
+
 ## Claude AI Desktop Setup
 
 To integrate with Claude AI Desktop, create or modify the configuration file at:
